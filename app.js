@@ -16,12 +16,36 @@ var app = new Vue({
     methods: {
         addTodo() {
             axios.post('todo.php', {
-                title: this.newTodo
+                title: this.newTodo,
+                completed: false
             })
             .then(response => {
                 console.log(response.data);
                 this.todos.push(response.data);
                 this.newTodo = '';
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        },
+        toggleCompleted(todo) {
+            axios.put(`todo.php?id=${todo.id}`, {
+                completed: !todo.completed
+            })
+            .then(response => {
+                console.log(response.data);
+                todo.completed = !todo.completed;
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        },
+        deleteTodo(todo) {
+            axios.delete(`todo.php?id=${todo.id}`)
+            .then(response => {
+                console.log(response.data);
+                const index = this.todos.indexOf(todo);
+                this.todos.splice(index, 1);
             })
             .catch(error => {
                 console.log(error);
@@ -32,11 +56,17 @@ var app = new Vue({
         <div>
             <h1>Todo List</h1>
             <ul>
-                <li v-for="todo in todos" :key="todo.id">{{ todo.title }}</li>
+                <li v-for="todo in todos" :key="todo.id">
+                    <label :class="{ completed: todo.completed }">
+                        <input type="checkbox" v-model="todo.completed" @click="toggleCompleted(todo)">
+                        {{ todo.title }}
+                    </label>
+                    <button @click="deleteTodo(todo)">Elimina</button>
+                </li>
             </ul>
             <form @submit.prevent="addTodo">
                 <input type="text" v-model="newTodo">
-                <button type="submit">Add</button>
+                <button type="submit">Aggiungi</button>
             </form>
         </div>
     `

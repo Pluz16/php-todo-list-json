@@ -1,11 +1,20 @@
 <?php
 
-$todos = array(
-    array("id" => 1, "title" => "Fare la spesa"),
-    array("id" => 2, "title" => "Lavare pavimento"),
-    array("id" => 3, "title" => "Studiare PHP"),
-);
+$filename = 'todo.json';
 
-echo json_encode($todos);
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $todos = json_decode(file_get_contents($filename), true);
+    echo json_encode($todos);
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $todos = json_decode(file_get_contents($filename), true);
+    $newTodo = array(
+        'id' => count($todos) + 1,
+        'title' => $input['title']
+    );
+    array_push($todos, $newTodo);
+    file_put_contents($filename, json_encode($todos));
+    echo json_encode($newTodo);
+}
 
 ?>
